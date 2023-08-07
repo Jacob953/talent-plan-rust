@@ -12,7 +12,7 @@
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
 
-use std::process::exit;
+use kvs::{KvStore, Result};
 
 use clap::{Parser, Subcommand};
 
@@ -47,20 +47,26 @@ enum Command {
     },
 }
 
-fn main() {
-    match Cli::parse() {
-        Set => {
-            eprintln!("unimplemented");
-            exit(1)
+fn main() -> Result<()> {
+    let cli = Cli::parse();
+
+    match cli.command {
+        Command::Set { key, value } => {
+            let mut store = KvStore::new();
+            store.set(key, value)?
         }
-        Get => {
-            eprintln!("unimplemented");
-            exit(1)
+        Command::Get { key } => {
+            let store = KvStore::new();
+            if let Some(value) = store.get(key)? {
+                println!("{value}")
+            } else {
+                println!("Key not found")
+            }
         }
-        Rm => {
-            eprintln!("unimplemented");
-            exit(1)
+        Command::Rm { key } => {
+            let mut store = KvStore::new();
+            store.remove(key)?
         }
-        _ => unreachable!(),
     }
+    Ok(())
 }

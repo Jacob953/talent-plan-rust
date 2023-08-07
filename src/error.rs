@@ -12,11 +12,19 @@
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
 
-#![deny(missing_docs)]
-//! A simple key/value store.
+use std::io;
 
-pub use error::Result;
-pub use kv::KvStore;
+use failure::Fail;
 
-mod error;
-mod kv;
+/// Result type for kvs.
+pub type Result<T> = std::result::Result<T, KvsError>;
+
+#[derive(Fail, Debug)]
+pub enum KvsError {
+    /// IO error.
+    #[fail(display = "{}", _0)]
+    Io(#[cause] io::Error),
+    /// Key not found
+    #[fail(display = "Key not found")]
+    KeyNotFoud,
+}

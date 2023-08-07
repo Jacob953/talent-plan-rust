@@ -12,7 +12,8 @@
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
 
-use std::{collections::HashMap, io::Error, path::PathBuf};
+use super::Result;
+use std::{collections::HashMap, path::PathBuf};
 
 /// The `KvStore` stores string key/value pairs.
 ///
@@ -65,6 +66,3 @@ impl KvStore {
         })
     }
 }
-
-/// Result type for kvs.
-pub type Result<T> = std::result::Result<T, Error>;
