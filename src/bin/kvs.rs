@@ -48,9 +48,7 @@ enum Command {
 }
 
 fn main() {
-    let cli = Cli::parse();
-
-    match cli {
+    match Cli::parse() {
         Set => {
             eprintln!("unimplemented");
             exit(1)
