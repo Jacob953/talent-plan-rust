@@ -12,4 +12,57 @@
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
 
-fn main() {}
+use std::process::exit;
+
+use clap::{Parser, Subcommand};
+
+/// Simple program to greet a person
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    #[command(subcommand)]
+    command: Command,
+}
+
+#[derive(Subcommand, Debug)]
+enum Command {
+    /// Set the value of a string key to a string
+    Set {
+        /// A string key
+        key: String,
+        /// The string value of the key
+        value: String,
+    },
+
+    /// Get the string value of a given string key
+    Get {
+        /// A string key
+        key: String,
+    },
+
+    /// Remove a given key
+    Rm {
+        /// A string key
+        key: String,
+    },
+}
+
+fn main() {
+    let cli = Cli::parse();
+
+    match cli {
+        Set => {
+            eprintln!("unimplemented");
+            exit(1)
+        }
+        Get => {
+            eprintln!("unimplemented");
+            exit(1)
+        }
+        Rm => {
+            eprintln!("unimplemented");
+            exit(1)
+        }
+        _ => unreachable!(),
+    }
+}
