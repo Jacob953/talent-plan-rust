@@ -12,6 +12,9 @@
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
 
+#![deny(missing_docs)]
+//! A simple key/value store.
+
 pub use kv::KvStore;
 
 mod kv;
