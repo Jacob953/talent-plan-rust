@@ -24,7 +24,24 @@ pub enum KvsError {
     /// IO error.
     #[fail(display = "{}", _0)]
     Io(#[cause] io::Error),
+
     /// Key not found
     #[fail(display = "Key not found")]
     KeyNotFoud,
+
+    /// Serialization or deserialization error.
+    #[fail(display = "{}", _0)]
+    Serde(#[cause] serde_json::Error),
+}
+
+impl From<io::Error> for KvsError {
+    fn from(error: io::Error) -> KvsError {
+        KvsError::Io(error)
+    }
+}
+
+impl From<serde_json::Error> for KvsError {
+    fn from(error: serde_json::Error) -> KvsError {
+        KvsError::Serde(error)
+    }
 }

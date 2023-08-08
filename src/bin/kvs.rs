@@ -12,9 +12,9 @@
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
 
-use kvs::{KvStore, Result};
-
 use clap::{Parser, Subcommand};
+use kvs::{KvStore, Result};
+use std::env::current_dir;
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -52,11 +52,11 @@ fn main() -> Result<()> {
 
     match cli.command {
         Command::Set { key, value } => {
-            let mut store = KvStore::new();
+            let mut store = KvStore::open(current_dir()?)?;
             store.set(key, value)?
         }
         Command::Get { key } => {
-            let store = KvStore::new();
+            let store = KvStore::open(current_dir()?)?;
             if let Some(value) = store.get(key)? {
                 println!("{value}")
             } else {
@@ -64,7 +64,7 @@ fn main() -> Result<()> {
             }
         }
         Command::Rm { key } => {
-            let mut store = KvStore::new();
+            let mut store = KvStore::open(current_dir()?)?;
             store.remove(key)?
         }
     }
