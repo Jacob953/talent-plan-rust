@@ -13,8 +13,9 @@
 // copies or substantial portions of the Software.
 
 use clap::{Parser, Subcommand};
-use kvs::{KvStore, Result};
+use kvs::{KvStore, KvsError, Result};
 use std::env::current_dir;
+use std::process::exit;
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -56,16 +57,22 @@ fn main() -> Result<()> {
             store.set(key, value)?
         }
         Command::Get { key } => {
-            let store = KvStore::open(current_dir()?)?;
-            if let Some(value) = store.get(key)? {
-                println!("{value}")
-            } else {
-                println!("Key not found")
+            let mut store = KvStore::open(current_dir()?)?;
+            match store.get(key.to_string())? {
+                Some(value) => println!("{value}"),
+                _ => println!("Key not found"),
             }
         }
         Command::Rm { key } => {
             let mut store = KvStore::open(current_dir()?)?;
-            store.remove(key)?
+            match store.remove(key.to_string()) {
+                Ok(()) => {}
+                Err(KvsError::KeyNotFound) => {
+                    println!("Key not found");
+                    exit(1);
+                }
+                Err(e) => return Err(e),
+            }
         }
     }
     Ok(())
