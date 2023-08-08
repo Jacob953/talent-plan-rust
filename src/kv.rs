@@ -47,7 +47,7 @@ pub struct KvStore {
     // writer of the current log.
     writer: BufWriterWithPos<File>,
     // map log file to the record args
-    records: BTreeMap<String, RecordArgs>,
+    index: BTreeMap<String, RecordArgs>,
 }
 
 impl KvStore {
@@ -57,13 +57,13 @@ impl KvStore {
         fs::create_dir_all(&path)?;
 
         let mut readers = HashMap::new();
-        let mut records = BTreeMap::new();
+        let mut index = BTreeMap::new();
 
         let log_list = sorted_log_list(&path)?;
 
         for &log in &log_list {
             let mut reader = BufReaderWithPos::new(File::open(log_path(&path, log))?)?;
-            load(log, &mut reader, &mut records);
+            load(log, &mut reader, &mut index);
             readers.insert(log, reader);
         }
 
@@ -74,7 +74,7 @@ impl KvStore {
             log,
             readers,
             writer,
-            records,
+            index,
         })
     }
 
@@ -87,7 +87,7 @@ impl KvStore {
         serde_json::to_writer(&mut self.writer, &cmd)?;
         self.writer.flush()?;
         if let MultipleCmd::Set { key, .. } = cmd {
-            self.records
+            self.index
                 .insert(key, (self.log, pos..self.writer.pos).into());
         }
         Ok(())
@@ -97,7 +97,7 @@ impl KvStore {
     ///
     /// Returns `None` if the given key does not exist.
     pub fn get(&mut self, key: String) -> Result<Option<String>> {
-        if let Some(record) = self.records.get(&key) {
+        if let Some(record) = self.index.get(&key) {
             let reader = self.readers.get_mut(&record.log).unwrap();
             reader.seek(SeekFrom::Start(record.pos))?;
             let cmd = reader.borrow_mut().take(record.len);
@@ -112,12 +112,12 @@ impl KvStore {
 
     /// Remove a given key.
     pub fn remove(&mut self, key: String) -> Result<()> {
-        if self.records.contains_key(&key) {
+        if self.index.contains_key(&key) {
             let cmd = MultipleCmd::rm(key);
             serde_json::to_writer(&mut self.writer, &cmd)?;
             self.writer.flush()?;
             if let MultipleCmd::Rm { key } = cmd {
-                self.records.remove(&key);
+                self.index.remove(&key);
             }
             return Ok(());
         }
