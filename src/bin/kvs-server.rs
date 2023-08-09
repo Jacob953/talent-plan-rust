@@ -12,11 +12,4 @@
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
 
-#![deny(missing_docs)]
-//! A simple key/value store.
-
-pub use error::{KvsError, Result};
-pub use kv::{KvStore, KvsEngine};
-
-mod error;
-mod kv;
+fn main() {}

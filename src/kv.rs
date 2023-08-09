@@ -376,3 +376,6 @@ impl<R: Read + Seek> Seek for BufReaderWithPos<R> {
         Ok(self.pos)
     }
 }
+
+/// KvsEngine
+pub trait KvsEngine {}
