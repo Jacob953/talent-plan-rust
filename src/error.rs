@@ -37,6 +37,11 @@ pub enum KvsError {
     /// It indicated a corrupted log or a program bug.
     #[fail(display = "Unexpected command type")]
     UnexpectedCommandType,
+
+    /// Unexpected engine type error.
+    /// It indicated a corrupted log or a program bug.
+    #[fail(display = "Unexpected engine type")]
+    UnexpectedEngineType,
 }
 
 impl From<io::Error> for KvsError {

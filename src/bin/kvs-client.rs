@@ -15,11 +15,15 @@
 use clap::{Parser, Subcommand};
 use kvs::{KvStore, KvsError, Result};
 use std::env::current_dir;
+use std::net::SocketAddr;
 use std::process::exit;
+
+const DEFAULT_LISTENING_ADDRESS: &str = "127.0.0.1:4000";
+const ADDRESS_FORMAT: &str = "IP:PORT";
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(name = "kvs-client",author, version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -33,37 +37,53 @@ enum Command {
         key: String,
         /// The string value of the key
         value: String,
+        /// Sets the server address
+        #[arg(long, value_name = ADDRESS_FORMAT, default_value = DEFAULT_LISTENING_ADDRESS)]
+        addr: SocketAddr,
     },
 
     /// Get the string value of a given string key
     Get {
         /// A string key
         key: String,
+        /// Sets the server address
+        #[arg(long, value_name = ADDRESS_FORMAT, default_value = DEFAULT_LISTENING_ADDRESS)]
+        addr: SocketAddr,
     },
 
     /// Remove a given key
     Rm {
         /// A string key
         key: String,
+        /// Sets the server address
+        #[arg(long, value_name = ADDRESS_FORMAT, default_value = DEFAULT_LISTENING_ADDRESS)]
+        addr: SocketAddr,
     },
 }
 
-fn main() -> Result<()> {
+fn main() {
     let cli = Cli::parse();
 
+    if let Err(err) = run(cli) {
+        eprintln!("{err}");
+        exit(1);
+    }
+}
+
+fn run(cli: Cli) -> Result<()> {
     match cli.command {
-        Command::Set { key, value } => {
+        Command::Set { key, value, addr } => {
             let mut store = KvStore::open(current_dir()?)?;
             store.set(key, value)?
         }
-        Command::Get { key } => {
+        Command::Get { key, addr } => {
             let mut store = KvStore::open(current_dir()?)?;
             match store.get(key.to_string())? {
                 Some(value) => println!("{value}"),
                 _ => println!("Key not found"),
             }
         }
-        Command::Rm { key } => {
+        Command::Rm { key, addr } => {
             let mut store = KvStore::open(current_dir()?)?;
             match store.remove(key.to_string()) {
                 Ok(()) => {}
